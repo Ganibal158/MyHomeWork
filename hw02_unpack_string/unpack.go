@@ -20,25 +20,18 @@ func Unpack(str string) (string, error) {
 			checkRune = val
 			continue
 		}
-
 		if unicode.IsDigit(checkRune) { // проверка на число
 			if unicode.IsDigit(val) {
 				return "", ErrInvalidString
 			}
 		}
-
 		if unicode.IsDigit(val) { // если текущий символ в цикле это цифра, ио записываем предидущий символ n раз
-
 			resultHw2 += strings.Repeat(string(checkRune), int(val-'0'))
-
 		} else if unicode.IsLetter(checkRune) || string(checkRune) == "\n" { // если не число то записываем символ
-
 			resultHw2 += string(checkRune)
-
 		}
 		checkRune = val
 		prVal = val
-
 	}
 	if unicode.IsLetter(prVal) || string(prVal) == "\n" { // проверка последнего символа
 		resultHw2 += string(prVal)
