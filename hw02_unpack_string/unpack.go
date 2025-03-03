@@ -27,7 +27,7 @@ func Unpack(str string) (string, error) {
 		}
 		if unicode.IsDigit(val) { // если текущий символ в цикле это цифра, ио записываем предидущий символ n раз
 			resultHw2.WriteString(strings.Repeat(string(checkRune), int(val-'0')))
-		} else if unicode.IsDigit(checkRune) == false { // если не число то записываем символ
+		} else if !unicode.IsDigit(checkRune) { // если не число то записываем символ
 			resultHw2.WriteString(string(checkRune))
 		}
 		checkRune = val
