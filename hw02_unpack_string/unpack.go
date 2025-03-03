@@ -9,6 +9,9 @@ import (
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
+	if str == "" {
+		return "", nil
+	}
 	var checkRune rune // буфер для записи предидущего значения в цикле
 	resultHw2 := strings.Builder{}
 	var prVal rune // переменная для проверки последнего символа в строке
@@ -33,7 +36,7 @@ func Unpack(str string) (string, error) {
 		checkRune = val
 		prVal = val
 	}
-	if unicode.IsLetter(prVal) || string(prVal) == "\n" { // проверка последнего символа
+	if !unicode.IsDigit(prVal) { // проверка последнего символа
 		resultHw2.WriteString(string(prVal))
 	}
 	resStr := resultHw2.String()
