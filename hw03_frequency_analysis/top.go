@@ -42,7 +42,7 @@ func Top10(str1 string) []string {
 		count int
 	}
 	var worsAndIndexes []WordAndIndex // сортируем попарно по частоте встреси и в случае совпадения частоты встречи лексикографически
-	for id, _ := range s2 {
+	for id := range s2 {
 		worsAndIndexes = append(worsAndIndexes, WordAndIndex{word: s3[id], count: s2[id]})
 	}
 	sort.Slice(worsAndIndexes, func(i, j int) bool {

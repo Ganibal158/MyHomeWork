@@ -27,6 +27,5 @@ func TestHW2(t *testing.T) {
 			"zzzz", // 1
 		}
 		require.Equal(t, expected, Top10(str1))
-
 	})
 }
