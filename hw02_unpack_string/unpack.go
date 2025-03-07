@@ -12,17 +12,14 @@ func Unpack(str string) (string, error) {
 	if str == "" {
 		return "", nil
 	}
-	var checkRune rune // буфер для записи предидущего значения в цикле
+	checkRune := rune(str[0])       // буфер для записи предидущего значения в цикле
+	if unicode.IsDigit(checkRune) { // проверка на цифру в начале строки
+		return "", ErrInvalidString
+	}
 	resultHw2 := strings.Builder{}
 	var prVal rune // переменная для проверки последнего символа в строке
-	for id, val := range str {
-		if id == 0 {
-			if unicode.IsDigit(val) { // проверка на цифру в начале строки
-				return "", ErrInvalidString
-			}
-			checkRune = val
-			continue
-		}
+
+	for _, val := range str {
 		if unicode.IsDigit(checkRune) { // проверка на число
 			if unicode.IsDigit(val) {
 				return "", ErrInvalidString
