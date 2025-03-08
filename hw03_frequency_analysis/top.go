@@ -14,7 +14,7 @@ func Top10(str1 string) []string {
 		word  string
 		count int
 	}
-	var worsAndIndexes []WordAndIndex
+	var worsAndIndexes []WordAndIndex = make([]WordAndIndex, 0, 100)
 	for i, val1 := range s {
 		index := 0
 		check := true
