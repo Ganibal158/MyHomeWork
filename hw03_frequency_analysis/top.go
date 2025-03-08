@@ -7,9 +7,9 @@ import (
 
 func Top10(str1 string) []string {
 	var top1 []string
-	var s []string = strings.Fields(str1) // слайс из исходной строки
-	var s2 []int                          // слайс для подсчёта частоты слова
-	var s3 []string                       // слайс уникальных значений
+	var s = strings.Fields(str1) // слайс из исходной строки
+	var s2 []int                 // слайс для подсчёта частоты слова
+	var s3 []string              // слайс уникальных значений
 	for i, val1 := range s {
 		index := 0
 		check := true
@@ -41,7 +41,7 @@ func Top10(str1 string) []string {
 		word  string
 		count int
 	}
-	var worsAndIndexes []WordAndIndex // сортируем попарно по частоте встреси и в случае совпадения частоты встречи лексикографически
+	var worsAndIndexes []WordAndIndex // сортируем попарно
 	for id := range s2 {
 		worsAndIndexes = append(worsAndIndexes, WordAndIndex{word: s3[id], count: s2[id]})
 	}
@@ -57,7 +57,7 @@ func Top10(str1 string) []string {
 	} else {
 		k = 10
 	}
-	for i := 0; i < k; i++ { // формируем выходной слайс длиной k (или 10 или равный количеству уникальных слов, в случае если их меньше 10)
+	for i := 0; i < k; i++ { // формируем выходной слайс длиной k
 		top1 = append(top1, worsAndIndexes[i].word)
 	}
 	return top1
