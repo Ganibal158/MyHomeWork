@@ -7,9 +7,14 @@ import (
 
 func Top10(str1 string) []string {
 	var top1 []string
-	var s = strings.Fields(str1) // слайс из исходной строки
-	var s2 []int                 // слайс для подсчёта частоты слова
-	var s3 []string              // слайс уникальных значений
+	s := strings.Fields(str1)  // слайс из исходной строки
+	var s2 []int               // слайс для подсчёта частоты слова
+	var s3 []string            // слайс уникальных значений
+	type WordAndIndex struct { // структура для сортировки с парами "слово"-"частота встреч"
+		word  string
+		count int
+	}
+	var worsAndIndexes []WordAndIndex
 	for i, val1 := range s {
 		index := 0
 		check := true
@@ -37,12 +42,7 @@ func Top10(str1 string) []string {
 			s2 = append(s2, index)
 		}
 	}
-	type WordAndIndex struct { // структура для сортировки с парами "слово"-"частота встреч"
-		word  string
-		count int
-	}
-	var worsAndIndexes []WordAndIndex // сортируем попарно
-	for id := range s2 {
+	for id := range s2 { // сортируем попарно
 		worsAndIndexes = append(worsAndIndexes, WordAndIndex{word: s3[id], count: s2[id]})
 	}
 	sort.Slice(worsAndIndexes, func(i, j int) bool {
