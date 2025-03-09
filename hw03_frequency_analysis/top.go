@@ -15,12 +15,12 @@ func Top10(str1 string) []string {
 	for _, word := range s {
 		WordAndIndex[word]++
 	}
-	var s3 []string // слайс с уникальными словами
+	s3 := make([]string, 0, len(WordAndIndex)) // слайс с уникальными словами
 	for key := range WordAndIndex {
 		s3 = append(s3, key)
 	}
 	sort.Slice(s3, func(i, j int) bool {
-		if WordAndIndex[s3[i]] != WordAndIndex[s3[j]] { //сортировка по количеству совпадений
+		if WordAndIndex[s3[i]] != WordAndIndex[s3[j]] { // сортировка по количеству совпадений
 			return WordAndIndex[s3[i]] > WordAndIndex[s3[j]]
 		}
 		return s3[i] < s3[j] // сортировка лексикографическая
