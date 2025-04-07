@@ -29,6 +29,7 @@ func NewList() List {
 func (l *list) Len() int {
 	return l.kolv
 }
+
 func (l *list) Front() *ListItem {
 	return l.front
 }
