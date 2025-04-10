@@ -19,7 +19,7 @@ type ListItem struct {
 type list struct {
 	front *ListItem
 	back  *ListItem
-	kolv  int
+	len   int
 }
 
 func NewList() List {
@@ -27,7 +27,7 @@ func NewList() List {
 }
 
 func (l *list) Len() int {
-	return l.kolv
+	return l.len
 }
 
 func (l *list) Front() *ListItem {
@@ -42,7 +42,7 @@ func (l *list) PushFront(v interface{}) *ListItem {
 	knot := &ListItem{}
 	knot.Value = v
 
-	if l.kolv == 0 {
+	if l.len == 0 {
 		l.front = knot
 		l.back = knot
 	} else {
@@ -50,14 +50,14 @@ func (l *list) PushFront(v interface{}) *ListItem {
 		l.front.Prev = knot
 		l.front = knot
 	}
-	l.kolv++
+	l.len++
 	return knot
 }
 
 func (l *list) PushBack(v interface{}) *ListItem {
 	knot := &ListItem{}
 	knot.Value = v
-	if l.kolv == 0 {
+	if l.len == 0 {
 		l.front = knot
 		l.back = knot
 	} else {
@@ -65,7 +65,7 @@ func (l *list) PushBack(v interface{}) *ListItem {
 		l.back.Next = knot
 		l.back = knot
 	}
-	l.kolv++
+	l.len++
 	return knot
 }
 
@@ -84,7 +84,14 @@ func (l *list) Remove(i *ListItem) {
 	} else {
 		l.back = i.Prev
 	}
-	l.kolv--
+	l.len--
+}
+
+func movList(l *list, i *ListItem) {
+	i.Next = l.front
+	i.Prev = nil
+	l.front.Prev = i
+	l.front = i
 }
 
 func (l *list) MoveToFront(i *ListItem) {
@@ -97,16 +104,10 @@ func (l *list) MoveToFront(i *ListItem) {
 	case l.back == i:
 		i.Prev.Next = nil
 		l.back = i.Prev
-		l.front.Prev = i
-		i.Prev = nil
-		i.Next = l.front
-		l.front = i
+		movList(l, i)
 	default:
 		i.Prev.Next = i.Next
 		i.Next.Prev = i.Prev
-		i.Next = l.front
-		i.Prev = nil
-		l.front.Prev = i
-		l.front = i
+		movList(l, i)
 	}
 }
