@@ -17,10 +17,97 @@ type ListItem struct {
 }
 
 type list struct {
-	List // Remove me after realization.
-	// Place your code here.
+	front *ListItem
+	back  *ListItem
+	len   int
 }
 
 func NewList() List {
 	return new(list)
+}
+
+func (l *list) Len() int {
+	return l.len
+}
+
+func (l *list) Front() *ListItem {
+	return l.front
+}
+
+func (l *list) Back() *ListItem {
+	return l.back
+}
+
+func (l *list) PushFront(v interface{}) *ListItem {
+	knot := &ListItem{}
+	knot.Value = v
+
+	if l.len == 0 {
+		l.front = knot
+		l.back = knot
+	} else {
+		knot.Next = l.front
+		l.front.Prev = knot
+		l.front = knot
+	}
+	l.len++
+	return knot
+}
+
+func (l *list) PushBack(v interface{}) *ListItem {
+	knot := &ListItem{}
+	knot.Value = v
+	if l.len == 0 {
+		l.front = knot
+		l.back = knot
+	} else {
+		knot.Prev = l.back
+		l.back.Next = knot
+		l.back = knot
+	}
+	l.len++
+	return knot
+}
+
+func (l *list) Remove(i *ListItem) {
+	if i == nil {
+		return
+	}
+	if i.Prev != nil {
+		i.Prev.Next = i.Next
+	} else {
+		l.front = i.Next
+	}
+
+	if i.Next != nil {
+		i.Next.Prev = i.Prev
+	} else {
+		l.back = i.Prev
+	}
+	l.len--
+}
+
+func movList(l *list, i *ListItem) {
+	i.Next = l.front
+	i.Prev = nil
+	l.front.Prev = i
+	l.front = i
+}
+
+func (l *list) MoveToFront(i *ListItem) {
+	if i == nil {
+		return
+	}
+	switch {
+	case i == l.front:
+		return
+	case l.back == i:
+		i.Prev.Next = nil
+		l.back = i.Prev
+		movList(l, i)
+	default:
+		i.Prev.Next = i.Next
+		i.Next.Prev = i.Prev
+		movList(l, i)
+	}
 }
