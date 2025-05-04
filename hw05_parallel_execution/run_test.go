@@ -67,4 +67,61 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+
+	t.Run("m less zero", func(t *testing.T) {
+		var runCounter int32
+		tasks := make([]Task, 10) // Создаём десять задач, которые при запуске инкрементируют счётчик
+		for i := 0; i < 10; i++ {
+			tasks[i] = func() error {
+				atomic.AddInt32(&runCounter, 1)
+				return nil
+			}
+		}
+		err := Run(tasks, 5, -1) // Согласно принятой логике, ни одна из задач не должна запустится
+		if !errors.Is(err, ErrErrorsLimitExceeded) {
+			t.Errorf("expected error %v, got %v", ErrErrorsLimitExceeded, err)
+		}
+		if atomic.LoadInt32(&runCounter) != 0 {
+			t.Errorf("expected runCounter to be 0, got %d", runCounter)
+		}
+	})
+
+	t.Run("Start with zero tusks", func(t *testing.T) {
+		workersCount := 10
+		maxErrorsCount := 1
+		done := make(chan struct{})
+		go func() { // Вызываем Run в отдельной горутине, чтобы проверить время её закрытия.
+			err := Run(nil, workersCount, maxErrorsCount)
+			require.NoError(t, err)
+			close(done)
+		}()
+		select {
+		case <-done: // канал закрылся вовремя, утечек быть не должно
+		case <-time.After(1 * time.Second):
+			t.Fatal("Run with nil tasks didn't return in time — possible goroutine leak")
+		}
+	})
+
+	t.Run("Parallelism test", func(t *testing.T) {
+		tasksCount := 50
+		sleepPerTask := 100 * time.Millisecond
+		tasks := make([]Task, 0, tasksCount)
+		var runTasksCount int32
+		for i := 0; i < tasksCount; i++ {
+			tasks = append(tasks, func() error {
+				time.Sleep(sleepPerTask)
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+		workersCount := 5
+		maxErrorsCount := 1
+		start := time.Now()
+		err := Run(tasks, workersCount, maxErrorsCount)
+		elapsed := time.Since(start)
+		require.NoError(t, err)
+		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
+		expectedSequential := sleepPerTask * time.Duration(tasksCount)
+		require.Less(t, elapsed, expectedSequential/2, "tasks likely ran sequentially")
+	})
 }
