@@ -94,7 +94,7 @@ func TestPipeline(t *testing.T) {
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
 
-	t.Run("no stages", func(t *testing.T) {
+	t.Run("no stages", func(t *testing.T) { // Тест на неотправку данных в stages
 		in := make(Bi)
 		go func() {
 			in <- 42
