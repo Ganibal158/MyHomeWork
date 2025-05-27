@@ -162,7 +162,6 @@ func TestAllStageStop(t *testing.T) {
 			result = append(result, s.(string))
 		}
 		wg.Wait()
-
 		require.Len(t, result, 0)
 	})
 }

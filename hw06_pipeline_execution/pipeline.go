@@ -1,7 +1,5 @@
 package hw06pipelineexecution
 
-import "sync"
-
 type (
 	In  = <-chan interface{}
 	Out = In
@@ -13,32 +11,31 @@ type Stage func(in In) (out Out)
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	out := in
 	for _, stage := range stages {
-		out = wrapWithDone(stage, out, done)
+		out = processingWithDone(out, done, stage)
 	}
 	return out
 }
 
-func wrapWithDone(stage Stage, in In, done In) Out {
-	var wg sync.WaitGroup
+func processingWithDone(in In, done In, stage Stage) Out {
 	stageOut := make(Bi)
 	go func() {
 		defer close(stageOut)
 		stageInput := make(Bi)
-		wg.Add(1)
 		go func() {
-			defer wg.Done()
 			defer close(stageInput)
 			for {
 				select {
 				case <-done:
-					return
+					break
 				case val, ok := <-in:
 					if !ok {
 						return
 					}
 					select {
 					case <-done:
-					case stageInput <- val:
+						return // возможно косяк тут и нужно сделать return/ break/ очистить канал/ переделать нахуй эту функцию чтобы она через sink.Once наращивала переменную по которой будут закрываться каналы
+
+					case stageInput <- val: // возможно тоже не совсем верно
 					}
 				}
 			}
@@ -50,7 +47,6 @@ func wrapWithDone(stage Stage, in In, done In) Out {
 			case stageOut <- val:
 			}
 		}
-		wg.Wait()
 	}()
 
 	return stageOut
