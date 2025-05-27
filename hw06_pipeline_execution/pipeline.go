@@ -33,9 +33,9 @@ func processingWithDone(in In, done In, stage Stage) Out {
 					}
 					select {
 					case <-done:
-						return // возможно косяк тут и нужно сделать return/ break/ очистить канал/ переделать нахуй эту функцию чтобы она через sink.Once наращивала переменную по которой будут закрываться каналы
+						return
 
-					case stageInput <- val: // возможно тоже не совсем верно
+					case stageInput <- val:
 					}
 				}
 			}
