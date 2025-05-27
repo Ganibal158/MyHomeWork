@@ -26,14 +26,14 @@ func processingWithDone(in In, done In, stage Stage) Out {
 			for {
 				select {
 				case <-done:
-					break
+					break // выход при закрытии канала
 				case val, ok := <-in:
 					if !ok {
 						return
 					}
 					select {
 					case <-done:
-						return
+						return // завершение при закрытии канала с отправкой выходного канала
 
 					case stageInput <- val:
 					}
