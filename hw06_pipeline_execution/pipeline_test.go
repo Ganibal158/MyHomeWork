@@ -93,6 +93,20 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("no stages", func(t *testing.T) { // Тест на неотправку данных в stages
+		in := make(Bi)
+		go func() {
+			in <- 42
+			close(in)
+		}()
+
+		out := ExecutePipeline(in, nil)
+
+		require.Equal(t, 42, <-out)
+		_, ok := <-out
+		require.False(t, ok, "channel should be closed")
+	})
 }
 
 func TestAllStageStop(t *testing.T) {
@@ -148,8 +162,6 @@ func TestAllStageStop(t *testing.T) {
 			result = append(result, s.(string))
 		}
 		wg.Wait()
-
 		require.Len(t, result, 0)
-
 	})
 }
