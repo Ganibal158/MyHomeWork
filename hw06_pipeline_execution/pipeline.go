@@ -1,5 +1,10 @@
 package hw06pipelineexecution
 
+import (
+	"log/slog"
+	"strconv"
+)
+
 type (
 	In  = <-chan interface{}
 	Out = In
@@ -10,44 +15,45 @@ type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	out := in
-	for _, stage := range stages {
-		out = processingWithDone(out, done, stage)
+	for pos, stage := range stages {
+		out = processingWithDone(pos, out, done, stage)
 	}
 	return out
 }
 
-func processingWithDone(in In, done In, stage Stage) Out {
-	stageOut := make(Bi)
+func processingWithDone(pos int, in In, done In, stage Stage) Out {
+	stageName := strconv.Itoa(pos)
+	stageOut := stage(in) // здесь мы создаём новую горутину, которая читает из in и отправляет значения в stageOut
+	out := make(Bi)
 	go func() {
-		defer close(stageOut)
-		stageInput := make(Bi)
-		go func() {
-			defer close(stageInput)
-			for {
+		// получает значения из stageOut и отправляет их в out, если не получен done
+		isDone := false
+
+		for {
+			if !isDone {
 				select {
 				case <-done:
-					break // выход при закрытии канала
-				case val, ok := <-in:
+					// не прекращаем слушать stageOut, просто закрываем out
+					close(out)
+					isDone = true
+				case val, ok := <-stageOut:
 					if !ok {
+						close(out)
 						return
 					}
-					select {
-					case <-done:
-						return // завершение при закрытии канала с отправкой выходного канала
-
-					case stageInput <- val:
-					}
+					out <- val
 				}
 			}
-		}()
-		for val := range stage(stageInput) {
-			select {
-			case <-done:
-				return
-			case stageOut <- val:
+			if isDone {
+				v, ok := <-stageOut
+				if ok {
+					slog.Info("processingWithDone got value after done", "stage", stageName, "value", v)
+				} else {
+					return
+				}
 			}
 		}
 	}()
 
-	return stageOut
+	return out
 }
