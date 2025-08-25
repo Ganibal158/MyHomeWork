@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log/slog"
 )
 
 var (
@@ -17,6 +18,16 @@ func init() {
 }
 
 func main() {
+
 	flag.Parse()
-	// Place your code here.
+	if from == "" || to == "" {
+		slog.Info("Both -from and -to flags are required")
+		return
+	}
+
+	err := Copy(from, to, offset, limit)
+	if err != nil {
+		slog.Info("Возникла ошибка при копировании", "err", err)
+	}
+
 }
