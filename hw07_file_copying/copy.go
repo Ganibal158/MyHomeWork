@@ -2,11 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
-
-	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -43,17 +42,48 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	sreader := io.NewSectionReader(src, offset, limit)
-	bar := pb.Full.Start64(limit)
+	buf := make([]byte, 32*1024) // 32KB буфер
 
-	reader := bar.NewProxyReader(sreader)
+	var copied int64
+	const progressBarWidth = 50
 
-	_, err = io.Copy(dst, reader)
-	if err != nil {
-		slog.Info("Ошибка копирования", "err", err)
-		return err
+	printProgress := func(copied, total int64) {
+		percent := float64(copied) / float64(total)
+		filled := int(percent * progressBarWidth)
+		empty := progressBarWidth - filled
+		fmt.Printf("\r[%s%s] %.2f%%",
+			string(repeat('#', filled)),
+			string(repeat('-', empty)),
+			percent*100,
+		)
 	}
 
-	bar.Finish()
+	for {
+		n, err := sreader.Read(buf)
+		if n > 0 {
+			written, werr := dst.Write(buf[:n])
+			if werr != nil {
+				return werr
+			}
+			copied += int64(written)
+			printProgress(copied, limit)
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
 
+	fmt.Println("\nКопирование завершено.")
 	return nil
+}
+
+func repeat(char rune, count int) []rune {
+	res := make([]rune, count)
+	for i := range res {
+		res[i] = char
+	}
+	return res
 }
