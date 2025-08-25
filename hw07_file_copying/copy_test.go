@@ -11,8 +11,7 @@ func TestCopy(t *testing.T) {
 	srcFile := tmpDir + "/test_src.txt"
 	content := []byte("wefygwefuhwefuhewuh")
 
-	// Создание исходного файла
-	err := os.WriteFile(srcFile, content, 0644)
+	err := os.WriteFile(srcFile, content, 0o644)
 	if err != nil {
 		t.Fatalf("ошибка создания исходного файла в тесте: %v", err)
 	}
@@ -25,17 +24,14 @@ func TestCopy(t *testing.T) {
 			t.Errorf("Ошибка при копировании в Full copy: %v", err)
 		}
 
-		// Чтение результата
 		result, err := os.ReadFile(dstFile)
 		if err != nil {
 			t.Fatalf("Ошибка чтения файла: %v", err)
 		}
 
-		// Сравнение
 		if string(result) != string(content) {
 			t.Errorf("Ошибка при копировании: Получили %q, а ожидали %q", result, content)
 		}
-
 	})
 
 	t.Run("Offset copy", func(t *testing.T) {
@@ -63,5 +59,4 @@ func TestCopy(t *testing.T) {
 			t.Errorf("Ожидалась ошибка при копировании из несуществующего файла, но её не было")
 		}
 	})
-
 }

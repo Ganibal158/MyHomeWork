@@ -18,10 +18,9 @@ func init() {
 }
 
 func main() {
-
 	flag.Parse()
 	if from == "" || to == "" {
-		slog.Info("Both -from and -to flags are required")
+		slog.Info("Пути к исходному файлу и файлу в который выполняется запись не должны быть пустами")
 		return
 	}
 
@@ -29,5 +28,4 @@ func main() {
 	if err != nil {
 		slog.Info("Возникла ошибка при копировании", "err", err)
 	}
-
 }
