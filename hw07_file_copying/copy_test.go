@@ -11,7 +11,7 @@ func TestCopy(t *testing.T) {
 	srcFile := tmpDir + "/test_src.txt"
 	content := []byte("wefygwefuhwefuhewuh")
 
-	err := os.WriteFile(srcFile, content, 0644)
+	err := os.WriteFile(srcFile, content, 0o644)
 	if err != nil {
 		t.Fatalf("ошибка создания исходного файла в тесте: %v", err)
 	}
