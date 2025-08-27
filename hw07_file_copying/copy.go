@@ -21,15 +21,14 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer src.Close()
 
-	dst, err := os.Create(toPath)
-	if err != nil {
-		slog.Info("Ошибка создания файла назначения", "err", err)
-		return err
-	}
 	info, err := src.Stat()
 	if err != nil {
 		slog.Info("Ошибка получения информации", "err", err)
 		return err
+	}
+	if !info.Mode().IsRegular() {
+		slog.Info("Исходный файл не поддерживается", "err", err)
+		return ErrUnsupportedFile
 	}
 	srcSize := info.Size()
 	if offset > srcSize {
@@ -41,21 +40,27 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		limit = srcSize - offset
 	}
 
+	dst, err := os.Create(toPath)
+	if err != nil {
+		slog.Info("Ошибка создания файла назначения", "err", err)
+		return err
+	}
+
 	sreader := io.NewSectionReader(src, offset, limit)
 	buf := make([]byte, 32*1024) // 32KB буфер
 
 	var copied int64
-	const progressBarWidth = 50
-
+	var lastPersent int
 	printProgress := func(copied, total int64) {
-		percent := float64(copied) / float64(total)
-		filled := int(percent * progressBarWidth)
-		empty := progressBarWidth - filled
-		fmt.Printf("\r[%s%s] %.2f%%",
-			string(repeat('#', filled)),
-			string(repeat('-', empty)),
-			percent*100,
-		)
+		percent := int(float64(copied) * 100 / float64(total))
+		if percent != lastPersent {
+			lastPersent = percent
+			fmt.Printf("\r[%s%s] %d%%",
+				string(repeat('#', (percent/2))),
+				string(repeat('-', (50-percent/2))),
+				percent,
+			)
+		}
 	}
 
 	for {
